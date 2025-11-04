@@ -59,10 +59,12 @@ void buildFrequencyTable(int freq[], const string& filename) {
     char ch;
     while (file.get(ch)) {
         // Convert uppercase to lowercase
+        // Makes sure 'A' and 'a' are the same symbol
         if (ch >= 'A' && ch <= 'Z')
             ch = ch - 'A' + 'a';
 
-        // Count only lowercase letters
+        // Count only alphabetical characters, ignore the spaces, punctuation, etc.
+        // Enhances trhe encoding... I think
         if (ch >= 'a' && ch <= 'z')
             freq[ch - 'a']++;
     }
@@ -77,16 +79,16 @@ int createLeafNodes(int freq[]) {
     for (char ch = 'a'; ch <= 'z'; ch++) {
         int index = ch - 'a';
         if (freq[index] > 0) {
-            charArr[nodeCount] = ch;
-            weightArr[nodeCount] = freq[index];
-            leftArr[nodeCount] = -1;
-            rightArr[nodeCount] = -1;
+            charArr[nodeCount] = ch; // Store actual character
+            weightArr[nodeCount] = freq[index]; // Store frequency count
+            leftArr[nodeCount] = -1; // Leaf nodes have no left children
+            rightArr[nodeCount] = -1; // Leaf nodes have no right children
 
-            nodeCount++;
+            nodeCount++; // Move to next slot
         }
     }
     cout << "Created " << nodeCount << " leaf nodes.\n";
-    return nodeCount;
+    return nodeCount; // return the starting index for new internal nodes
 }
 
 // Step 3: Build the encoding tree using heap operations
@@ -106,18 +108,20 @@ int buildEncodingTree(int nextFree) {
         heap.push(i, weightArr);
     }
 
-
+    // Build by combining two least frequent nodes
+    // Only until one node remains (root)
     while (heap.size > 1) { // 3.
-        // smallest nodes popped
+        // smallest nodes popped, from smallest frequencies
         int left = heap.pop(weightArr);
         int right = heap.pop(weightArr);
 
-        // New parent node created
+        // New internal node made (frequency + child pointers)
         weightArr[nextFree] = weightArr[left] + weightArr[right];
-        leftArr[nextFree] = left;
-        rightArr[nextFree] = right;
-        charArr[nextFree] = '\0';
+        leftArr[nextFree] = left; // set left child pointer
+        rightArr[nextFree] = right; // set right child pointer
+        charArr[nextFree] = '\0'; // Internal nodes don't store characters
 
+        //Add new combined node back to heap
         heap.push(nextFree, weightArr);
         nextFree++;
     }
@@ -131,17 +135,23 @@ void generateCodes(int root, string codes[]) {
     // Left edge adds '0', right edge adds '1'.
     // Record code when a leaf node is reached.
 
+    // Use stack for iterative
+    // Each stack element tracks a node
     stack<pair<int, string>> stk;
-    stk.push({root, ""});
+    stk.push({root, ""}); // start with empty binary code
 
     while (!stk.empty()) {
         auto [node, code] = stk.top();
         stk.pop();
 
         if (charArr[node] != '\0') {
+            // leaf node reached, store
+            // more frequent characters get shorter due to structure
             int charIndex = charArr[node] - 'a';
             codes[charIndex] = code;
         } else {
+            // it's internal node, continue traversal
+            // left child traversal adds '0' to current
             if (leftArr[node] != -1) {
                 stk.push({leftArr[node], code + "0"});
             }
@@ -155,19 +165,25 @@ void generateCodes(int root, string codes[]) {
 
 // Step 5: Print table and encoded message
 void encodeMessage(const string& filename, string codes[]) {
+    // display the code table
     cout << "\nCharacter : Code\n";
     for (int i = 0; i < 26; ++i) {
         if (!codes[i].empty())
             cout << char('a' + i) << " : " << codes[i] << "\n";
     }
 
+    // display the encoded binary message by converting to its code
     cout << "\nEncoded message:\n";
 
     ifstream file(filename);
     char ch;
     while (file.get(ch)) {
+        // input character to lowercase
         if (ch >= 'A' && ch <= 'Z')
             ch = ch - 'A' + 'a';
+
+        // output binary code for each alphabetical char.
+        // non-alphabetical skipped
         if (ch >= 'a' && ch <= 'z')
             cout << codes[ch - 'a'];
     }

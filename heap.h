@@ -18,19 +18,27 @@ struct MinHeap {
     void push(int idx, int weightArr[]) {
         // TODO: insert index at end of heap, restore order using upheap()
 
+        // add new element at the end
         data[size] = idx;
         int current = size;
         size++;
 
+
+        // bubble up new element until correct position
+        // min-heap property: parent <= children
         while (current > 0) {
             int parent = (current - 1) / 2;
+
+            // compare weights of current nodes to parent
             if (weightArr[data[current]] < weightArr[data[parent]]) {
+
+            // swap if smaller
                 int temp = data[current];
                 data[current] = data[parent];
                 data[parent] = temp;
-                current = parent;
+                current = parent; // move up to parent's position
             } else {
-                break;
+                break; // to stop bubbling up if satisfied
             }
         }
     }
@@ -40,35 +48,39 @@ struct MinHeap {
         // Replace root with last element, then call downheap()
 
 
-        if (size == 0)
+        if (size == 0) // empty heap condition
             return -1;// placeholder
 
+        // bubble down to restore structure
         int minItem = data[0];
         data[0] = data[size - 1];
         size--;
 
         // Downheap
         int current = 0;
-        while (2 * current + 1 < size) {
-            int leftChild = 2 * current + 1;
-            int rightChild = 2 * current + 2;
-            int smallest = current;
+        while (2 * current + 1 < size) { // continue while node has at least left child
+            int leftChild = 2 * current + 1; // calculate left child index
+            int rightChild = 2 * current + 2; // calculate right child index
+            int smallest = current; // assume it's smallest
 
+            // compare with left to find smallest
             if (leftChild < size && weightArr[data[leftChild]] < weightArr[data[smallest]]) {
                 smallest = leftChild;
             }
 
+            // compare with right if find smallers
             if (rightChild < size && weightArr[data[rightChild]] < weightArr[data[smallest]]) {
                 smallest = rightChild;
             }
 
+            // if current node not smallest, swap with smallest child
             if (smallest != current) {
                 int temp = data[current];
                 data[current] = data[smallest];
                 data[smallest] = temp;
                 current = smallest;
             } else {
-                break;
+                break; // satisfied condition, stop bubbling down
             }
         }
 
