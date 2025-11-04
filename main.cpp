@@ -73,18 +73,20 @@ void buildFrequencyTable(int freq[], const string& filename) {
 
 // Step 2: Create leaf nodes for each character
 int createLeafNodes(int freq[]) {
-    int nextFree = 0;
-    for (int i = 0; i < 26; ++i) {
-        if (freq[i] > 0) {
-            charArr[nextFree] = 'a' + i;
-            weightArr[nextFree] = freq[i];
-            leftArr[nextFree] = -1;
-            rightArr[nextFree] = -1;
-            nextFree++;
+    int nodeCount = 0;
+    for (char ch = 'a'; ch <= 'z'; ch++) {
+        int index = ch - 'a';
+        if (freq[index] > 0) {
+            charArr[nodeCount] = ch;
+            weightArr[nodeCount] = freq[index];
+            leftArr[nodeCount] = -1;
+            rightArr[nodeCount] = -1;
+
+            nodeCount++;
         }
     }
-    cout << "Created " << nextFree << " leaf nodes.\n";
-    return nextFree;
+    cout << "Created " << nodeCount << " leaf nodes.\n";
+    return nodeCount;
 }
 
 // Step 3: Build the encoding tree using heap operations
